@@ -97,7 +97,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
       @Override public void onClick(View v) {
         if (isConnected){
           new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
-              .content(R.string.content_test)
+              .content(R.string.symbol_search_content)
               .inputType(InputType.TYPE_CLASS_TEXT)
               .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
                 @Override public void onInput(MaterialDialog dialog, CharSequence input) {
@@ -108,7 +108,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                       new String[] { input.toString() }, null);
                   if (c.getCount() != 0) {
                     Toast toast =
-                        Toast.makeText(MyStocksActivity.this, "This stock is already saved!",
+                        Toast.makeText(MyStocksActivity.this, R.string.stock_is_already_saved_toast,
                             Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                     toast.show();

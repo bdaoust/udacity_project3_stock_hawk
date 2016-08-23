@@ -1,13 +1,30 @@
 <resources>
   <string name="app_name">Stock Hawk</string>
 
-  <string name="action_example">Example action</string>
-
+  <!-- Settings action located in the overflow menu of the app bar -->
   <string name="action_settings">Settings</string>
+
+  <!-- Title for the action to change the monetary units, located in the app bar -->
   <string name="action_change_units">Change Units</string>
+
+  <!-- Title for the dialog used when searching for a new stock to add -->
   <string name="symbol_search">Symbol Search</string>
-  <string name="content_test">Search for a Stock Symbol</string>
-  <string name="input_hint">FB</string>
-  <string name="input_prefill"></string>
+
+  <!-- Content for the dialog used when searching for a new stock to add -->
+  <string name="symbol_search_content">Search for a Stock Symbol</string>
+
+  <!-- Hint for the input field used when searching for a new stock to add. The hint is a stock symbol -->
+  <string name="input_hint" translatable="false">FB</string>
+
+  <!-- (This value is empty by design) Prefill value for the input field used when searching for a new stock to add. -->
+  <string name="input_prefill"/>
+
+  <!-- Toast message displayed when there is no connection to the internet present -->
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+
+  <!-- Toast message displayed when the stock to be added has already been saved -->
+  <string name="stock_is_already_saved_toast">This stock is already saved!</string>
+
+
+  <string name="stock_not_found">Stock not found</string>
 </resources>
