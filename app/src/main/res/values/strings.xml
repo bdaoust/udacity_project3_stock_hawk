@@ -27,4 +27,7 @@
 
 
   <string name="stock_not_found">Stock not found</string>
+
+  <!-- Accessibility Description for the FAB (Floating Action Button) to add a new stock -->
+  <string name="accessibility_add_new_stock">Add new stock</string>
 </resources>
