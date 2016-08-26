@@ -4,6 +4,8 @@ import android.content.ContentProviderOperation;
 import android.util.Log;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.exceptions.StockNotFoundException;
+
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,6 +77,9 @@ public class Utils {
         QuoteProvider.Quotes.CONTENT_URI);
     try {
       String change = jsonObject.getString("Change");
+      if(change.equals("null")){
+        throw new StockNotFoundException("Stock not found");
+      }
       builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString("symbol"));
       builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString("Bid")));
       builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(

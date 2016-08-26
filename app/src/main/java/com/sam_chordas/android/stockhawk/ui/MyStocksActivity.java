@@ -1,9 +1,11 @@
 package com.sam_chordas.android.stockhawk.ui;
 
 import android.app.LoaderManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -52,11 +54,13 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   private Context mContext;
   private Cursor mCursor;
   boolean isConnected;
+  private StockNotFoundBroadcastReceiver mStockNotFoundBroadcastReceiver;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mContext = this;
+    mStockNotFoundBroadcastReceiver = new StockNotFoundBroadcastReceiver();
     ConnectivityManager cm =
         (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -159,7 +163,17 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   @Override
   public void onResume() {
     super.onResume();
+    IntentFilter intentFilter;
+
+    intentFilter = new IntentFilter("com.sam_chordas.android.stockhawk.NOTIFY_STOCK_NOT_FOUND");
+    registerReceiver(mStockNotFoundBroadcastReceiver, intentFilter);
     getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
+  }
+
+  @Override
+  protected void onPause() {
+    unregisterReceiver(mStockNotFoundBroadcastReceiver);
+    super.onPause();
   }
 
   public void networkToast(){
@@ -223,4 +237,15 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     mCursorAdapter.swapCursor(null);
   }
 
+
+  private class StockNotFoundBroadcastReceiver extends BroadcastReceiver{
+    /** Custom BroadcastReceiver based on http://hmkcode.com/android-sending-receiving-custom-broadcasts/ **/
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      Toast toast;
+
+      toast = Toast.makeText(mContext, R.string.stock_not_found_toast, Toast.LENGTH_SHORT);
+      toast.show();
+    }
+  }
 }

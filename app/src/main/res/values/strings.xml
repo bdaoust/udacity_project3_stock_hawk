@@ -25,8 +25,8 @@
   <!-- Toast message displayed when the stock to be added has already been saved -->
   <string name="stock_is_already_saved_toast">This stock is already saved!</string>
 
-
-  <string name="stock_not_found">Stock not found</string>
+  <!-- Toast message displayed when there is no stock found that corresponds to given stock symbol -->
+  <string name="stock_not_found_toast">Stock not found</string>
 
   <!-- Accessibility Description for the FAB (Floating Action Button) to add a new stock -->
   <string name="accessibility_add_new_stock">Add new stock</string>

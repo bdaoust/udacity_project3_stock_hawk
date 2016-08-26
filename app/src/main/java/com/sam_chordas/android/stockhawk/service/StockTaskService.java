@@ -2,6 +2,7 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -12,6 +13,7 @@ import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.exceptions.StockNotFoundException;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -125,6 +127,11 @@ public class StockTaskService extends GcmTaskService{
               Utils.quoteJsonToContentVals(getResponse));
         }catch (RemoteException | OperationApplicationException e){
           Log.e(LOG_TAG, "Error applying batch insert", e);
+        }
+        catch (StockNotFoundException e){
+          /** Custom intent sent through Broadcast based on http://hmkcode.com/android-sending-receiving-custom-broadcasts/ **/
+          Intent intent = new Intent("com.sam_chordas.android.stockhawk.NOTIFY_STOCK_NOT_FOUND");
+          mContext.sendBroadcast(intent);
         }
       } catch (IOException e){
         e.printStackTrace();
