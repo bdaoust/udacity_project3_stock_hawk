@@ -2,26 +2,46 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Typeface;
+import android.os.Build;
+import android.os.Bundle;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+import android.widget.TextView;
 
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.StocksAppWidgetProvider;
+import com.sam_chordas.android.stockhawk.data.QuoteColumns;
+import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.rest.Utils;
+import com.sam_chordas.android.stockhawk.ui.StockChartActivity;
 
 public class StocksWidgetService extends RemoteViewsService{
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
+
         return new StockRemoteViewsFactory(this.getApplicationContext(), intent);
     }
 
     private class StockRemoteViewsFactory implements RemoteViewsFactory{
 
         private Context mContext;
+        private Cursor mCursor;
         private int mAppWidgetId;
 
         public StockRemoteViewsFactory(Context context, Intent intent){
             mContext = context;
             mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+
+            mCursor = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                    new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                    QuoteColumns.ISCURRENT + " = ?",
+                    new String[]{"1"},
+                    null);
         }
 
 
@@ -32,7 +52,6 @@ public class StocksWidgetService extends RemoteViewsService{
 
         @Override
         public void onDataSetChanged() {
-
         }
 
         @Override
@@ -42,19 +61,38 @@ public class StocksWidgetService extends RemoteViewsService{
 
         @Override
         public int getCount() {
-            return 5;
+            return mCursor.getCount();
         }
 
         @Override
         public RemoteViews getViewAt(int position) {
-            RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.list_item_quote);
+            RemoteViews remoteView = new RemoteViews(mContext.getPackageName(), R.layout.list_item_quote);
 
-            rv.setTextViewText(R.id.stock_symbol, "ABC " + (position+1));
-            rv.setTextViewText(R.id.bid_price, "99.88");
-            rv.setTextViewText(R.id.change, "77%");
+            mCursor.moveToPosition(position);
 
-            // Return the remote views object.
-            return rv;
+            remoteView.setTextViewText(R.id.stock_symbol, mCursor.getString(mCursor.getColumnIndex("symbol")));
+            remoteView.setTextViewText(R.id.bid_price, mCursor.getString(mCursor.getColumnIndex("bid_price")));
+            if (Utils.showPercent){
+                remoteView.setTextViewText(R.id.change, mCursor.getString(mCursor.getColumnIndex("percent_change")));
+            } else{
+                remoteView.setTextViewText(R.id.change, mCursor.getString(mCursor.getColumnIndex("change")));
+            }
+
+            /** Solution for changing the background based on http://stackoverflow.com/questions/6333774/change-remoteview-imageview-background */
+            if(mCursor.getInt(mCursor.getColumnIndex("is_up")) == 1){
+                remoteView.setInt(R.id.change, "setBackgroundResource", R.drawable.percent_change_pill_green);
+            } else {
+                remoteView.setInt(R.id.change, "setBackgroundResource", R.drawable.percent_change_pill_red);
+            }
+
+            Bundle extras = new Bundle();
+            extras.putString(StocksAppWidgetProvider.EXTRA_STOCK_SYMBOL, mCursor.getString(mCursor.getColumnIndex("symbol")));
+
+            Intent fillIntent = new Intent();
+            fillIntent.putExtras(extras);
+            remoteView.setOnClickFillInIntent(R.id.list_item_quote, fillIntent);
+
+            return remoteView;
         }
 
         @Override

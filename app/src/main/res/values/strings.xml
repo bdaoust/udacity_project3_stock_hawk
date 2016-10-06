@@ -13,6 +13,18 @@
   <!-- Content for the dialog used when searching for a new stock to add -->
   <string name="symbol_search_content">Search for a Stock Symbol</string>
 
+  <!-- TextView showing when the stocks were last updated (ex. Last updated 5 minutes ago) -->
+  <string name="last_updated">Last updated %1$d %2$s ago</string>
+
+  <!-- Minutes text used in the last_updated string resource  -->
+  <string name="time_minutes">minutes</string>
+
+  <!-- Hours text used in the last_updated string resource  -->
+  <string name="time_hours">hours</string>
+
+  <!-- Days text used in the last_updated string resource  -->
+  <string name="time_days">days</string>
+
   <!-- Hint for the input field used when searching for a new stock to add. The hint is a stock symbol -->
   <string name="input_hint" translatable="false">FB</string>
 
@@ -30,4 +42,5 @@
 
   <!-- Accessibility Description for the FAB (Floating Action Button) to add a new stock -->
   <string name="accessibility_add_new_stock">Add new stock</string>
+
 </resources>

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.RemoteException;
@@ -125,6 +126,15 @@ public class StockTaskService extends GcmTaskService{
           }
           mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
               Utils.quoteJsonToContentVals(getResponse));
+
+          SharedPreferences preferences;
+          SharedPreferences.Editor editor;
+
+          preferences = mContext.getSharedPreferences("STOCK_HAWK_PREFS", MODE_PRIVATE);
+          editor = preferences.edit();
+          editor.putLong("stocksUpdatedTimestamp", System.currentTimeMillis());
+
+          editor.apply();
         }catch (RemoteException | OperationApplicationException e){
           Log.e(LOG_TAG, "Error applying batch insert", e);
         }

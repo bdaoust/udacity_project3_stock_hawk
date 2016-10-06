@@ -7,9 +7,12 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.Settings;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
@@ -17,10 +20,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.sam_chordas.android.stockhawk.R;
@@ -52,22 +57,27 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   private static final int CURSOR_LOADER_ID = 0;
   private QuoteCursorAdapter mCursorAdapter;
   private Context mContext;
+  //private NetworkInfo mActiveNetwork;
   private Cursor mCursor;
-  boolean isConnected;
+  private ConnectivityManager mConnectivityManager;
+  private boolean isConnected;
   private StockNotFoundBroadcastReceiver mStockNotFoundBroadcastReceiver;
+  private ContentLoadingProgressBar mContentLoadingProgressBar;
+  private TextView mLastUpdatedTextView;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mContext = this;
     mStockNotFoundBroadcastReceiver = new StockNotFoundBroadcastReceiver();
-    ConnectivityManager cm =
-        (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+    mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-    isConnected = activeNetwork != null &&
-        activeNetwork.isConnectedOrConnecting();
+    isConnected = checkIsConnected(mConnectivityManager);
     setContentView(R.layout.activity_my_stocks);
+
+    mContentLoadingProgressBar = (ContentLoadingProgressBar)findViewById(R.id.progress);
+    mLastUpdatedTextView = (TextView)findViewById(R.id.last_updated);
+
     // The intent service is for executing immediate pulls from the Yahoo API
     // GCMTaskService can only schedule tasks, they cannot execute immediately
     mServiceIntent = new Intent(this, StockIntentService.class);
@@ -75,6 +85,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
       // Run the initialize task service so that some stocks appear upon an empty database
       mServiceIntent.putExtra("tag", "init");
       if (isConnected){
+
+        //mContentLoadingProgressBar.show();
         startService(mServiceIntent);
       } else{
         networkToast();
@@ -84,12 +96,22 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
 
+
+
     mCursorAdapter = new QuoteCursorAdapter(this, null);
     recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(this,
             new RecyclerViewItemClickListener.OnItemClickListener() {
               @Override public void onItemClick(View v, int position) {
-                //TODO:
-                // do something on item click
+                Intent intent;
+                TextView stockTextView;
+                String symbol;
+
+                stockTextView = (TextView)v.findViewById(R.id.stock_symbol);
+                symbol = stockTextView.getText().toString();
+
+                intent = new Intent(mContext, StockChartActivity.class);
+                intent.putExtra("STOCK_SYMBOL",symbol);
+                startActivity(intent);
               }
             }));
     recyclerView.setAdapter(mCursorAdapter);
@@ -168,6 +190,9 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     intentFilter = new IntentFilter("com.sam_chordas.android.stockhawk.NOTIFY_STOCK_NOT_FOUND");
     registerReceiver(mStockNotFoundBroadcastReceiver, intentFilter);
     getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
+    Log.v("aaa","******************* onResume Called ****************");
+
+    isConnected = checkIsConnected(mConnectivityManager);
   }
 
   @Override
@@ -217,6 +242,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
   @Override
   public Loader<Cursor> onCreateLoader(int id, Bundle args){
+    Log.v("aaa", "************** onCreateLoader called ****************");
+    mContentLoadingProgressBar.show();
     // This narrows the return to only the stocks that are most current.
     return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
         new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
@@ -228,8 +255,24 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
   @Override
   public void onLoadFinished(Loader<Cursor> loader, Cursor data){
+    Log.v("aaa", "************** onLoadFinished called ****************");
     mCursorAdapter.swapCursor(data);
     mCursor = data;
+    mContentLoadingProgressBar.hide();
+
+    SharedPreferences preferences;
+
+    preferences = getSharedPreferences("STOCK_HAWK_PREFS", MODE_PRIVATE);
+    long stocksUpdatedTimestamp = preferences.getLong("stocksUpdatedTimestamp", 0);
+
+    if(stocksUpdatedTimestamp > 0){
+      mLastUpdatedTextView.setVisibility(View.VISIBLE);
+
+      String lastUpdated;
+      lastUpdated = getLastUpdated(System.currentTimeMillis() - stocksUpdatedTimestamp);
+      mLastUpdatedTextView.setText(lastUpdated);
+
+    }
   }
 
   @Override
@@ -247,5 +290,45 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
       toast = Toast.makeText(mContext, R.string.stock_not_found_toast, Toast.LENGTH_SHORT);
       toast.show();
     }
+  }
+
+  private boolean checkIsConnected(ConnectivityManager connectivityManager){
+    NetworkInfo networkInfo;
+
+    networkInfo = connectivityManager.getActiveNetworkInfo();
+
+    return networkInfo != null && networkInfo.isConnectedOrConnecting();
+  }
+
+  public String getLastUpdated(long elapsedTime){
+    String lastUpdated;
+    String days;
+    String hours;
+    String minutes;
+
+    long one_minute_ms = 60*1000;
+    long sixty_minutes_ms = 60*one_minute_ms;
+    long twenty_four_hours_ms = 24*sixty_minutes_ms;
+    long numb;
+
+    days = getString(R.string.time_days);
+    hours = getString(R.string.time_hours);
+    minutes = getString(R.string.time_minutes);
+
+    if(elapsedTime >= twenty_four_hours_ms){
+      numb = elapsedTime/(twenty_four_hours_ms);
+
+      lastUpdated = getString(R.string.last_updated, numb, days);
+    } else if(elapsedTime >= sixty_minutes_ms){
+      numb = elapsedTime/(sixty_minutes_ms);
+
+      lastUpdated = getString(R.string.last_updated, numb, hours);
+    } else {
+      numb = elapsedTime/one_minute_ms;
+
+      lastUpdated =  getString(R.string.last_updated, numb, minutes);
+    }
+
+    return lastUpdated;
   }
 }
