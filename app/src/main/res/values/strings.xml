@@ -43,4 +43,31 @@
   <!-- Accessibility Description for the FAB (Floating Action Button) to add a new stock -->
   <string name="accessibility_add_new_stock">Add new stock</string>
 
+  <!-- Stock Bid Price label in the Line Graph Activity -->
+  <string name="stock_label_bid_price">Bid Price:</string>
+
+  <!-- Stock Book Value label in the Line Graph Activity -->
+  <string name="stock_label_book_value">Book Value:</string>
+
+  <!-- Stock Days Low label in the Line Graph Activity -->
+  <string name="stock_label_days_low">Days Low:</string>
+
+  <!-- Stock Days High label in the Line Graph Activity -->
+  <string name="stock_label_days_high">Days High:</string>
+
+  <!-- Stock Year Low label in the Line Graph Activity -->
+  <string name="stock_label_years_low">Year Low:</string>
+
+  <!-- Stock Year High label in the Line Graph Activity -->
+  <string name="stock_label_years_high">Year High:</string>
+
+  <!-- Stock Market Cap label in the Line Graph Activity -->
+  <string name="stock_label_market_cap">Market Cap:</string>
+
+  <!-- Stock Dividend Yield label in the Line Graph Activity -->
+  <string name="stock_label_dividend_yield">Dividend Yield:</string>
+
+  <!-- Text that is shown on the StockChartActivity when a stock value is not available -->
+  <string name="stock_value_not_available">N/A</string>
+
 </resources>

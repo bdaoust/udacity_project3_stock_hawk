@@ -29,8 +29,10 @@
           style="@style/BidPriceTextStyle"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:paddingRight="10sp"
-          android:paddingEnd="10sp"
+          android:paddingLeft="10dp"
+          android:paddingRight="10dp"
+          android:paddingStart="10dp"
+          android:paddingEnd="10dp"
           tools:text="1000.00"
           />
       <TextView

@@ -91,6 +91,14 @@ public class Utils {
       }else{
         builder.withValue(QuoteColumns.ISUP, 1);
       }
+      builder.withValue(QuoteColumns.NAME, jsonObject.getString("Name"));
+      builder.withValue(QuoteColumns.BOOK_VALUE, jsonObject.getString("BookValue"));
+      builder.withValue(QuoteColumns.DAYS_LOW, jsonObject.getString("DaysLow"));
+      builder.withValue(QuoteColumns.DAYS_HIGH, jsonObject.getString("DaysHigh"));
+      builder.withValue(QuoteColumns.YEAR_LOW, jsonObject.getString("YearLow"));
+      builder.withValue(QuoteColumns.YEAR_HIGH, jsonObject.getString("YearHigh"));
+      builder.withValue(QuoteColumns.MARKET_CAP, jsonObject.getString("MarketCapitalization"));
+      builder.withValue(QuoteColumns.DIVIDEND_YIELD, jsonObject.getString("DividendYield"));
 
     } catch (JSONException e){
       e.printStackTrace();
