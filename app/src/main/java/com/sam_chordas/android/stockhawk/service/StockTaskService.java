@@ -29,11 +29,11 @@ import java.net.URLEncoder;
  * and is used for the initialization and adding task as well.
  */
 public class StockTaskService extends GcmTaskService{
-  private String LOG_TAG = StockTaskService.class.getSimpleName();
+  private static final String LOG_TAG = StockTaskService.class.getSimpleName();
 
-  private OkHttpClient client = new OkHttpClient();
+  private final OkHttpClient client = new OkHttpClient();
   private Context mContext;
-  private StringBuilder mStoredSymbols = new StringBuilder();
+  private final StringBuilder mStoredSymbols = new StringBuilder();
   private boolean isUpdate;
 
   public StockTaskService(){}
@@ -70,7 +70,7 @@ public class StockTaskService extends GcmTaskService{
       initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
           new String[] { "Distinct " + QuoteColumns.SYMBOL }, null,
           null, null);
-      if (initQueryCursor.getCount() == 0 || initQueryCursor == null){
+      if (initQueryCursor == null || initQueryCursor.getCount() == 0){
         // Init task. Populates DB with quotes for the symbols seen below
         try {
           urlStringBuilder.append(
@@ -78,12 +78,13 @@ public class StockTaskService extends GcmTaskService{
         } catch (UnsupportedEncodingException e) {
           e.printStackTrace();
         }
-      } else if (initQueryCursor != null){
+      } else {
         DatabaseUtils.dumpCursor(initQueryCursor);
         initQueryCursor.moveToFirst();
         for (int i = 0; i < initQueryCursor.getCount(); i++){
-          mStoredSymbols.append("\""+
-              initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol"))+"\",");
+          mStoredSymbols.append("\"")
+                  .append(initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol")))
+                  .append("\",");
           initQueryCursor.moveToNext();
         }
         mStoredSymbols.replace(mStoredSymbols.length() - 1, mStoredSymbols.length(), ")");
@@ -111,7 +112,6 @@ public class StockTaskService extends GcmTaskService{
     String getResponse;
     int result = GcmNetworkManager.RESULT_FAILURE;
 
-    if (urlStringBuilder != null){
       urlString = urlStringBuilder.toString();
       try{
         getResponse = fetchData(urlString);
@@ -124,6 +124,7 @@ public class StockTaskService extends GcmTaskService{
             mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
                 null, null);
           }
+
           mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
               Utils.quoteJsonToContentVals(getResponse));
 
@@ -146,9 +147,8 @@ public class StockTaskService extends GcmTaskService{
       } catch (IOException e){
         e.printStackTrace();
       }
-    }
 
-    return result;
+      return result;
   }
 
 }

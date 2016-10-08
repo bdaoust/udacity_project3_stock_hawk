@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.provider.Settings;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -20,7 +19,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,8 +55,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   private static final int CURSOR_LOADER_ID = 0;
   private QuoteCursorAdapter mCursorAdapter;
   private Context mContext;
-  //private NetworkInfo mActiveNetwork;
-  private Cursor mCursor;
   private ConnectivityManager mConnectivityManager;
   private boolean isConnected;
   private StockNotFoundBroadcastReceiver mStockNotFoundBroadcastReceiver;
@@ -86,7 +82,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
       mServiceIntent.putExtra("tag", "init");
       if (isConnected){
 
-        //mContentLoadingProgressBar.show();
         startService(mServiceIntent);
       } else{
         networkToast();
@@ -138,13 +133,13 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                             Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                     toast.show();
-                    return;
                   } else {
                     // Add the stock to DB
                     mServiceIntent.putExtra("tag", "add");
                     mServiceIntent.putExtra("symbol", input.toString());
                     startService(mServiceIntent);
                   }
+                  c.close();
                 }
               })
               .show();
@@ -190,7 +185,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     intentFilter = new IntentFilter("com.sam_chordas.android.stockhawk.NOTIFY_STOCK_NOT_FOUND");
     registerReceiver(mStockNotFoundBroadcastReceiver, intentFilter);
     getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
-    Log.v("aaa","******************* onResume Called ****************");
 
     isConnected = checkIsConnected(mConnectivityManager);
   }
@@ -242,7 +236,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
   @Override
   public Loader<Cursor> onCreateLoader(int id, Bundle args){
-    Log.v("aaa", "************** onCreateLoader called ****************");
     mContentLoadingProgressBar.show();
     // This narrows the return to only the stocks that are most current.
     return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
@@ -255,9 +248,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
   @Override
   public void onLoadFinished(Loader<Cursor> loader, Cursor data){
-    Log.v("aaa", "************** onLoadFinished called ****************");
     mCursorAdapter.swapCursor(data);
-    mCursor = data;
+
     mContentLoadingProgressBar.hide();
 
     SharedPreferences preferences;

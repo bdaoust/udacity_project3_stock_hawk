@@ -70,4 +70,7 @@
   <!-- Text that is shown on the StockChartActivity when a stock value is not available -->
   <string name="stock_value_not_available">N/A</string>
 
+  <!-- Text shown in the Stocks Widget the collection is empty-->
+  <string name="no_stocks">No Stocks</string>
+
 </resources>

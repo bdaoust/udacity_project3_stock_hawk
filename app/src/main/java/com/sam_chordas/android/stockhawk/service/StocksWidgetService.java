@@ -2,39 +2,32 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-import android.widget.TextView;
 
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.StocksAppWidgetProvider;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
-import com.sam_chordas.android.stockhawk.ui.StockChartActivity;
 
 public class StocksWidgetService extends RemoteViewsService{
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
 
-        return new StockRemoteViewsFactory(this.getApplicationContext(), intent);
+        return new StockRemoteViewsFactory(this.getApplicationContext());
     }
 
     private class StockRemoteViewsFactory implements RemoteViewsFactory{
 
         private Context mContext;
         private Cursor mCursor;
-        private int mAppWidgetId;
 
-        public StockRemoteViewsFactory(Context context, Intent intent){
+        StockRemoteViewsFactory(Context context){
             mContext = context;
-            mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 
             mCursor = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,

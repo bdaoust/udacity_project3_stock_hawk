@@ -16,6 +16,6 @@
         android:gravity="center"
         android:textColor="#ffffff"
         android:textStyle="bold"
-        android:text="Some Empty Text"
+        android:text="@string/no_stocks"
         android:textSize="20sp" />
 </FrameLayout>

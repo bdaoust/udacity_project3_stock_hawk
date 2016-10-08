@@ -1,8 +1,6 @@
 package com.sam_chordas.android.stockhawk.ui;
 
-
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -10,8 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.db.chart.model.LineSet;
@@ -55,7 +51,6 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
         extras = getIntent().getExtras();
         if(extras != null){
             mSymbol = extras.getString("STOCK_SYMBOL");
-            Log.v("aaa", "The stock symbol is... : " + mSymbol);
         }
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
 
@@ -66,7 +61,6 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
         // This narrows the return to only the stocks that are most current.
         return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
                 new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP,
                         QuoteColumns.NAME, QuoteColumns.BIDPRICE, QuoteColumns.BOOK_VALUE,
                         QuoteColumns.DAYS_LOW, QuoteColumns.DAYS_HIGH, QuoteColumns.YEAR_LOW,
                         QuoteColumns.YEAR_HIGH, QuoteColumns.MARKET_CAP, QuoteColumns.DIVIDEND_YIELD},
@@ -98,23 +92,23 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
             labels[i] = "";
             values[i] = data.getFloat(data.getColumnIndex(QuoteColumns.BIDPRICE));
         }
-        Log.v("aaa", "Cursor count: " + data.getCount());
-
 
         LineSet dataset = new LineSet(labels, values);
         dataset.beginAt(0);
         dataset.endAt(dataset.size()-1);
         dataset.setColor(getResources().getColor(android.R.color.white));
         dataset.setThickness(3);
-        Log.v("aa","The thickness is: " + dataset.getThickness());
 
         LineChartView lineChartView = (LineChartView)findViewById(R.id.linechart);
-        lineChartView.addData(dataset);
-        lineChartView.setAxisBorderValues(findMin(values), findMax(values));
-        lineChartView.setAxisColor(getResources().getColor(android.R.color.white));
-        lineChartView.setLabelsColor(getResources().getColor(android.R.color.white));
 
-        lineChartView.show();
+        if(lineChartView != null) {
+            lineChartView.addData(dataset);
+            lineChartView.setAxisBorderValues(findMin(values), findMax(values));
+            lineChartView.setAxisColor(getResources().getColor(android.R.color.white));
+            lineChartView.setLabelsColor(getResources().getColor(android.R.color.white));
+
+            lineChartView.show();
+        }
 
         data.moveToLast();
 
@@ -137,22 +131,21 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
         mStockYearHigh.setText(stockYearHighValue);
         mStockMarketCap.setText(stockMarketCapValue);
         mStockDividendYield.setText(stockDividendYieldValue);
-        //mCursorAdapter.swapCursor(data);
-        //mCursor = data;
+
+        data.close();
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader){
-        //mCursorAdapter.swapCursor(null);
     }
 
     private int findMin(float[] values){
         float min;
 
         min = values[0];
-        for(int i = 0; i < values.length; i++){
-            if(values[i] < min){
-                min = values[i];
+        for (float value : values) {
+            if (value < min) {
+                min = value;
             }
         }
 
@@ -163,9 +156,9 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
         float max;
 
         max = values[0];
-        for(int i = 0; i < values.length; i++){
-            if(values[i] > max){
-                max = values[i];
+        for (float value : values) {
+            if (value > max) {
+                max = value;
             }
         }
 

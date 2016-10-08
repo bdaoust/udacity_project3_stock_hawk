@@ -16,17 +16,17 @@ import org.json.JSONObject;
  */
 public class Utils {
 
-  private static String LOG_TAG = Utils.class.getSimpleName();
+  private static final String LOG_TAG = Utils.class.getSimpleName();
 
   public static boolean showPercent = true;
 
-  public static ArrayList quoteJsonToContentVals(String JSON){
+  public static ArrayList<ContentProviderOperation> quoteJsonToContentVals(String JSON){
     ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
-    JSONObject jsonObject = null;
-    JSONArray resultsArray = null;
+    JSONObject jsonObject;
+    JSONArray resultsArray;
     try{
       jsonObject = new JSONObject(JSON);
-      if (jsonObject != null && jsonObject.length() != 0){
+      if (jsonObject.length() != 0){
         jsonObject = jsonObject.getJSONObject("query");
         int count = Integer.parseInt(jsonObject.getString("count"));
         if (count == 1){
@@ -50,12 +50,12 @@ public class Utils {
     return batchOperations;
   }
 
-  public static String truncateBidPrice(String bidPrice){
+  private static String truncateBidPrice(String bidPrice){
     bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
     return bidPrice;
   }
 
-  public static String truncateChange(String change, boolean isPercentChange){
+  private static String truncateChange(String change, boolean isPercentChange){
     String weight = change.substring(0,1);
     String ampersand = "";
     if (isPercentChange){
@@ -72,7 +72,7 @@ public class Utils {
     return change;
   }
 
-  public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject){
+  private static ContentProviderOperation buildBatchOperation(JSONObject jsonObject){
     ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
         QuoteProvider.Quotes.CONTENT_URI);
     try {

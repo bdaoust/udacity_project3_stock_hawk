@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.sam_chordas.android.stockhawk.service.StocksWidgetService;
@@ -19,9 +18,7 @@ public class StocksAppWidgetProvider extends AppWidgetProvider{
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(SHOW_STOCK_DETAILS_ACTION)) {
-            int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             String stockSymbol = intent.getStringExtra(EXTRA_STOCK_SYMBOL);
-            Log.v("StocksAppWidgetProvider", "Intent action is SHOW_STOCK..." + stockSymbol);
 
             Intent startActivityIntent;
 
@@ -35,15 +32,13 @@ public class StocksAppWidgetProvider extends AppWidgetProvider{
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
-        for(int i = 0; i < appWidgetIds.length; i++){
-            int currentAppWidgetId = appWidgetIds[i];
-
+        for (int currentAppWidgetId : appWidgetIds) {
             RemoteViews remoteViews;
 
             remoteViews = new RemoteViews(context.getPackageName(), R.layout.stocks_app_widget);
 
             Intent intent = new Intent(context, StocksWidgetService.class);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[i]);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentAppWidgetId);
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
 
             remoteViews.setRemoteAdapter(R.id.list_view, intent);
@@ -51,7 +46,7 @@ public class StocksAppWidgetProvider extends AppWidgetProvider{
 
             Intent showStockDetailsIntent = new Intent(context, StocksAppWidgetProvider.class);
             showStockDetailsIntent.setAction(SHOW_STOCK_DETAILS_ACTION);
-            showStockDetailsIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[i]);
+            showStockDetailsIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, currentAppWidgetId);
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
 
             PendingIntent showStockDetailsPendingIntent =
