@@ -16,7 +16,7 @@ import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 
-public class StockChartActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public class StockChartActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int CURSOR_LOADER_ID = 0;
     private String mSymbol;
@@ -49,7 +49,7 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
         mStockDividendYield = (TextView) findViewById(R.id.stock_dividend_yield_value);
 
         extras = getIntent().getExtras();
-        if(extras != null){
+        if (extras != null) {
             mSymbol = extras.getString("STOCK_SYMBOL");
         }
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
@@ -57,10 +57,10 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args){
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This narrows the return to only the stocks that are most current.
         return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
-                new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                         QuoteColumns.NAME, QuoteColumns.BIDPRICE, QuoteColumns.BOOK_VALUE,
                         QuoteColumns.DAYS_LOW, QuoteColumns.DAYS_HIGH, QuoteColumns.YEAR_LOW,
                         QuoteColumns.YEAR_HIGH, QuoteColumns.MARKET_CAP, QuoteColumns.DIVIDEND_YIELD},
@@ -70,7 +70,7 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data){
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         float[] values;
         String[] labels;
         String stockNameValue;
@@ -87,7 +87,7 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
         values = new float[data.getCount()];
 
         data.moveToFirst();
-        for(int i = 0; i < data.getCount(); i++){
+        for (int i = 0; i < data.getCount(); i++) {
             data.moveToPosition(i);
             labels[i] = "";
             values[i] = data.getFloat(data.getColumnIndex(QuoteColumns.BIDPRICE));
@@ -95,15 +95,23 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
 
         LineSet dataset = new LineSet(labels, values);
         dataset.beginAt(0);
-        dataset.endAt(dataset.size()-1);
+        dataset.endAt(dataset.size() - 1);
         dataset.setColor(getResources().getColor(android.R.color.white));
         dataset.setThickness(3);
 
-        LineChartView lineChartView = (LineChartView)findViewById(R.id.linechart);
+        LineChartView lineChartView = (LineChartView) findViewById(R.id.linechart);
 
-        if(lineChartView != null) {
+        if (lineChartView != null) {
             lineChartView.addData(dataset);
-            lineChartView.setAxisBorderValues(findMin(values), findMax(values));
+            if (findMin(values) == findMax(values)) {
+                // setAxisBorderValues(int minValue, int maxValue) will fail if
+                // minValue is equal to maxValue so we pass in the values
+                // minValue -1 and maxValue + 1
+                lineChartView.setAxisBorderValues(findMin(values) - 1, findMax(values) + 1);
+            } else {
+                lineChartView.setAxisBorderValues(findMin(values), findMax(values));
+            }
+
             lineChartView.setAxisColor(getResources().getColor(android.R.color.white));
             lineChartView.setLabelsColor(getResources().getColor(android.R.color.white));
 
@@ -136,10 +144,10 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader){
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 
-    private int findMin(float[] values){
+    private int findMin(float[] values) {
         float min;
 
         min = values[0];
@@ -149,10 +157,10 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
-        return (int)Math.floor(min);
+        return (int) Math.floor(min);
     }
 
-    private int findMax(float[] values){
+    private int findMax(float[] values) {
         float max;
 
         max = values[0];
@@ -162,17 +170,17 @@ public class StockChartActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
-        return (int)Math.ceil(max);
+        return (int) Math.ceil(max);
     }
 
-    private String getStockValue(Cursor cursor, String columnName){
+    private String getStockValue(Cursor cursor, String columnName) {
         String value;
         int columnIndex;
 
         columnIndex = cursor.getColumnIndex(columnName);
         value = cursor.getString(columnIndex);
 
-        if(value.equals("null")){
+        if (value.equals("null")) {
             value = getResources().getString(R.string.stock_value_not_available);
         }
 
