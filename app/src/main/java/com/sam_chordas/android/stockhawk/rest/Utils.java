@@ -51,7 +51,12 @@ public class Utils {
   }
 
   private static String truncateBidPrice(String bidPrice){
-    bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
+    if (bidPrice == null || bidPrice.equals("null")) {
+      bidPrice = "N/A";
+    } else {
+      bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
+    }
+
     return bidPrice;
   }
 
