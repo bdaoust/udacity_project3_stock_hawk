@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
@@ -118,9 +119,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
       @Override public void onClick(View v) {
         if (isConnected){
           new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
-              .content(R.string.symbol_search_content)
-              .inputType(InputType.TYPE_CLASS_TEXT)
-              .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
+                  .content(R.string.symbol_search_content)
+                  .backgroundColor(getResources().getColor(android.R.color.black))
+                  .inputType(InputType.TYPE_CLASS_TEXT)
+                  .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
                 @Override public void onInput(MaterialDialog dialog, CharSequence input) {
                   // On FAB click, receive user input. Make sure the stock doesn't already exist
                   // in the DB and proceed accordingly
